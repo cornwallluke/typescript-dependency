@@ -84,5 +84,6 @@ ax = fig.add_subplot(111)
 nx.draw(dependencies, pos, node_size=0, width = 0.1, alpha = 0.6, with_labels=True, font_size = 5)
 plt.axis("tight")
 # ax.set_aspect(.3)
-# plt.show()
+
 plt.savefig("dependencies.svg")
+plt.show()
