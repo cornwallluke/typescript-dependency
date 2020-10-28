@@ -1,6 +1,7 @@
 import glob
 import json
 import re
+import sys
 import networkx as nx
 from networkx.drawing.nx_agraph import graphviz_layout
 
@@ -41,12 +42,16 @@ print(max(cycles, key = len))
 print(sorted(cycles, key = len)[:5])
     # print(i)
 dependentlength = []
+root = sys.argv[1] if len(sys.argv)>1 else "./app.module"
+nodes = {root}
 for i in files:
     # print(i)
 
-    if nx.has_path(dependencies, "./app.module", i) and i!="./app.module":
+    if nx.has_path(dependencies, root, i) and i!=root:
+        nodes.add(i)
         # print(list(map(len, nx.all_simple_paths(dependencies, "./app.module", i))))
-        dependentlength.append((i, nx.shortest_path_length(dependencies, "./app.module", i)))#, nx.bellman_ford_path_length(dependencies, "./app.module", i, weight = "long")))#, max(map(len, nx.all_simple_paths(dependencies, "./app.module", i))),3))
+        dependentlength.append((i, nx.shortest_path_length(dependencies, root, i)))#, nx.bellman_ford_path_length(dependencies, "./app.module", i, weight = "long")))#, max(map(len, nx.all_simple_paths(dependencies, "./app.module", i))),3))
+dependencies = dependencies.subgraph(nodes).copy()
 # print(dependentlength)
 # print("\n".join([str(i[0]) for i in sorted(dependentlength, key = lambda x:x[1], reverse = True)]))
 # plt.subplot()
@@ -55,11 +60,7 @@ for i in files:
 # plt.draw()
 # plt.show()
 # plt.rcParams.update({'font.size': 1})
-def inc():
-    i = -1
-    while True:
-        i+=1
-        yield i+1
+
 class incr:
     _vals = {}
     @classmethod
