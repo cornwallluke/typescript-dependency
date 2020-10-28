@@ -31,22 +31,24 @@ for i in files:
     dependencies.add_node(i)
     for x in files[i]:
         if x in files:
-            dependencies.add_edge(i, x)
+            dependencies.add_edge(i, x, long = -1)
 
 
 
 # pos = graphviz_layout(dependencies, prog="twopi", args="", root = "./app.module")
-
-
+cycles = list(nx.simple_cycles(dependencies))
+print(max(cycles, key = len))
+print(sorted(cycles, key = len)[:5])
+    # print(i)
 dependentlength = []
 for i in files:
     # print(i)
 
     if nx.has_path(dependencies, "./app.module", i) and i!="./app.module":
         # print(list(map(len, nx.all_simple_paths(dependencies, "./app.module", i))))
-        dependentlength.append((i, nx.shortest_path_length(dependencies, "./app.module", i)))#, max(map(len, nx.all_simple_paths(dependencies, "./app.module", i))),3))
+        dependentlength.append((i, nx.shortest_path_length(dependencies, "./app.module", i)))#, nx.bellman_ford_path_length(dependencies, "./app.module", i, weight = "long")))#, max(map(len, nx.all_simple_paths(dependencies, "./app.module", i))),3))
 # print(dependentlength)
-print("\n".join([str(i[0]) for i in sorted(dependentlength, key = lambda x:x[1], reverse = True)]))
+# print("\n".join([str(i[0]) for i in sorted(dependentlength, key = lambda x:x[1], reverse = True)]))
 # plt.subplot()
 # nx.draw(dependencies, with_labels = True)
 # # print(json.dumps({"./app.module":depender(files["./app.module"])}))
@@ -58,10 +60,22 @@ def inc():
     while True:
         i+=1
         yield i+1
-a = inc()
-pos = {i:(-1,next(a)) for i in dependencies}
+class incr:
+    _vals = {}
+    @classmethod
+    def next(cls, level):
+        if level not in cls._vals:
+            cls._vals[level]=0
+        else:
+            cls._vals[level] = (abs(cls._vals[level])+1)*((-1)**(cls._vals[level]>0))
+        return (level, cls._vals[level])
+
+pos = {}
 for i in dependentlength:
-    pos[i[0]]=(i[1],pos[i[0]][1])
+    t = incr.next(i[1])
+    # print(t)
+    pos[i[0]]=t#incr.next(i[1])
+pos = {**pos,**{i:incr.next(0) for i in dependencies if i not in pos}}
 print(pos)
 
 fig = plt.figure(figsize=(8, 24))
